@@ -7,16 +7,13 @@ import LoadingScreen from './screens/loading';
 import MapScreen from './screens/map';
 import ListScreen from './screens/list';
 import AboutScreen from './screens/about';
-import Icons from 'react-native-vector-icons/Ionicons';
+import Icons from 'react-native-vector-icons/FontAwesome';
 import Foundation from 'react-native-vector-icons/Foundation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Theme from './theme';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
-Icons.loadFont();
-Foundation.loadFont();
-MaterialCommunityIcons.loadFont();
 
 const TabNavigator = () => {
   return (
@@ -24,7 +21,11 @@ const TabNavigator = () => {
       tabBarOptions={{
         activeTintColor: Theme.secondaryColor,
         inactiveTintColor: 'white',
-        style: {backgroundColor: Theme.mainColor},
+        style: {
+          backgroundColor: Theme.mainColor,
+          height: 70,
+          paddingBottom: 10,
+        },
       }}>
       <Tab.Screen
         name="Pharmacies"
@@ -32,7 +33,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: 'Pharmacies',
           tabBarIcon: ({color, size}) => (
-            <Icons name="ios-list" color={color} size={size} />
+            <Icons name="map-pin" color={color} size={size} />
           ),
         }}
       />
@@ -40,7 +41,7 @@ const TabNavigator = () => {
         name="Map"
         component={MapScreen}
         options={{
-          tabBarLabel: 'Map',
+          tabBarLabel: 'Explorer',
           tabBarIcon: ({color, size}) => (
             <MaterialCommunityIcons
               name="google-maps"
@@ -51,10 +52,10 @@ const TabNavigator = () => {
         }}
       />
       <Tab.Screen
-        name="About Us"
+        name="À propos"
         component={AboutScreen}
         options={{
-          tabBarLabel: 'About',
+          tabBarLabel: 'À propos',
           tabBarIcon: ({color, size}) => (
             <MaterialCommunityIcons
               name="information-variant"

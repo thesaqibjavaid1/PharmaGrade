@@ -163,7 +163,7 @@ const MapScreen = ({navigation}) => {
                 }}>
                 <View style={styles.button}>
                   <Ionicons name="ios-navigate-circle-sharp" size={20} />
-                  <Text style={{margin: 2, fontWeight: '700'}}>Direction</Text>
+                  <Text style={{margin: 2, fontWeight: '700'}}>Itinéraire</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
@@ -172,7 +172,7 @@ const MapScreen = ({navigation}) => {
                 }}>
                 <View style={styles.button}>
                   <Ionicons name="ios-call" size={20} />
-                  <Text style={{margin: 2, fontWeight: '700'}}>Call</Text>
+                  <Text style={{margin: 2, fontWeight: '700'}}>Appeler</Text>
                 </View>
               </TouchableOpacity>
             </View>
