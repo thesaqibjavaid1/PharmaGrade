@@ -39,6 +39,13 @@
 	</dict>
   <key>NSLocationWhenInUseUsageDescription</key>
   <string>This app wants to get your current location to show you the pharmacies near you </string>
+  <key>NFCReaderUsageDescription</key>
+  <string>we will add precription of medicine against nfc tag and read that prescriptions through nfc</string>
+  <key>com.apple.developer.nfc.readersession.formats</key>
+  <array>
+    <string>NDEF</string>
+    <string>TAG</string>
+  </array>
 
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
@@ -54,5 +61,24 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+  <key>UIAppFonts</key>
+  <array>
+    <string>AntDesign.ttf</string>
+    <string>Entypo.ttf</string>
+    <string>EvilIcons.ttf</string>
+    <string>Feather.ttf</string>
+    <string>FontAwesome.ttf</string>
+    <string>FontAwesome5_Brands.ttf</string>
+    <string>FontAwesome5_Regular.ttf</string>
+    <string>FontAwesome5_Solid.ttf</string>
+    <string>Fontisto.ttf</string>
+    <string>Foundation.ttf</string>
+    <string>Ionicons.ttf</string>
+    <string>MaterialCommunityIcons.ttf</string>
+    <string>MaterialIcons.ttf</string>
+    <string>Octicons.ttf</string>
+    <string>SimpleLineIcons.ttf</string>
+    <string>Zocial.ttf</string>
+  </array>
 </dict>
 </plist>
