@@ -21,10 +21,10 @@ const MapScreen = ({navigation}) => {
   const [pharmacies, setPharmacies] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [initialPosition, setInitialPosition] = React.useState({
-    latitude: 52.24416338040521,
-    longitude: 21.077596969371196,
-    latitudeDelta: 0.09,
-    longitudeDelta: 0.035,
+    latitude: 33.2591422,
+    longitude: -8.5124015,
+    latitudeDelta: 0.0023,
+    longitudeDelta: 0.01,
   });
   const mapRef = React.useRef(null);
   React.useEffect(() => {
@@ -32,7 +32,7 @@ const MapScreen = ({navigation}) => {
       let initialPosition = {
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
-        latitudeDelta: 0.09,
+        latitudeDelta: 0.0000009,
         longitudeDelta: 0.035,
       };
 
@@ -189,6 +189,7 @@ const MapScreen = ({navigation}) => {
         ref={mapRef}
         initialRegion={initialPosition}
         showsMyLocationButton={true}
+        maxZoomLevel={80}
         followsUserLocation={true}
         showsUserLocation={true}
         onMapReady={() => {
