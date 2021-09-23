@@ -3,7 +3,7 @@ import {Text, View, ActivityIndicator, Image, StyleSheet} from 'react-native';
 import Theme from '../theme';
 const LoadingScreen = ({navigation}) => {
   React.useEffect(() => {
-    setTimeout(() => navigation.replace('tab'), 3000);
+    setTimeout(() => navigation.replace('tab'), 1500);
   }, []);
   return (
     <View style={styles.container}>

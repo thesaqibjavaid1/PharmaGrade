@@ -1,6 +1,6 @@
 import React from 'react';
 import {
-  SafeAreaView,
+  Dimensions,
   View,
   Linking,
   StyleSheet,
@@ -8,14 +8,15 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   FlatList,
+  Platform,
 } from 'react-native';
 import Geolocation from 'react-native-geolocation-service';
 import {getDistance, getPreciseDistance} from 'geolib';
 import MapView, {Marker, PROVIDER_GOOGLE, Region} from 'react-native-maps';
 import Theme from '../theme';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
-import api from '../api/api';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Octicons from 'react-native-vector-icons/Octicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const MapScreen = ({navigation}) => {
   const [pharmacies, setPharmacies] = React.useState([]);
@@ -43,56 +44,47 @@ const MapScreen = ({navigation}) => {
   }, []);
 
   const calculateDistance = (latitude, longitude) => {
-    let dis = getDistance(
-      {
-        latitude: initialPosition.latitude,
-        longitude: initialPosition.longitude,
-      },
-      {latitude: latitude, longitude: longitude},
-    );
+    if (latitude && longitude) {
+      let dis = getDistance(
+        {
+          latitude: initialPosition.latitude,
+          longitude: initialPosition.longitude,
+        },
+        {latitude: latitude, longitude: longitude},
+      );
 
-    if (dis > 1000) {
-      let num = parseFloat(dis / 1000);
-      let cal = num.toFixed(1);
-      return cal + ' km';
-    } else {
-      return dis + ' m';
+      if (dis > 1000) {
+        let num = parseFloat(dis / 1000);
+        let cal = num.toFixed(1);
+        return cal + ' km';
+      } else {
+        return dis + ' m';
+      }
     }
   };
 
   const getPharmacies = async () => {
-    const data = new FormData();
-    data.append('lat', initialPosition.latitude);
-    data.append('lng', initialPosition.longitude);
-    try {
-      const results = await api
-        .post('/pharmacies', data, {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            authorization: 'Bearer 6c57f52e2c8cabe497d9e0411b7c7dbb',
+    fetch(
+      `https://app.pharmagarde.ma/api/gards/position/${initialPosition.latitude}/${initialPosition.longitude}`,
+    )
+      .then((response) => response.json())
+      .then((data) => {
+        console.log('data map api', JSON.parse(data));
+        const d = JSON.parse(data);
+        mapRef.current?.animateCamera({
+          center: {
+            latitude: d[0].lat ? d[0].lat : d[39].lat,
+            longitude: d[0].long ? d[0].long : d[39].long,
           },
-        })
-        .then((res) => {
-          console.log('res: ', res);
-          setLoading(false);
-          setPharmacies(res.data.response.pharmacies);
-        })
-        .catch((err) => {
-          setLoading(false);
-          console.log('winners error');
-          alert(err.message);
-          console.log(err);
+          zoom: 25,
         });
-    } catch (err) {
-      setLoading(false);
-      console.log(err);
-      alert(err.message);
-    }
+        setLoading(false);
+        setPharmacies(JSON.parse(data));
+      });
   };
   React.useEffect(() => {
     getPharmacies();
-  }, [initialPosition]);
+  }, [initialPosition, loading]);
 
   const goToInitialLocation = () => {
     let initialRegion = Object.assign({}, initialPosition);
@@ -121,58 +113,67 @@ const MapScreen = ({navigation}) => {
         <View
           style={{
             flex: 1,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
           }}>
           <View style={{flex: 1}}>
-            <Text style={styles.mainText}>{item.item.Name}</Text>
-            <Text style={styles.greyText}>{item.item.City}</Text>
-            <Text style={styles.greyText}>
-              {calculateDistance(item.item.Lat, item.item.Lng)}
-            </Text>
-            <Text
-              style={[
-                styles.greyText,
-                {color: item.item.Garde_label ? 'green' : 'grey'},
-              ]}>
-              {item.item.Garde_label
-                ? item.item.Garde_label
-                : 'Pas de garde (Horaires normaux)'}
-            </Text>
+            <View style={{flex: 0.8}}>
+              <Text style={styles.mainText}>
+                {'Pharmacie ' + item.item.name}
+              </Text>
+              <Text style={styles.greyText}>{item.item.address}</Text>
+              {/* {item.item.lat && item.item.lat ? (
+                <Text style={styles.greyText}>
+                  {calculateDistance(item.item.lat, item.item.long)}
+                </Text>
+              ) : null} */}
+              <Text
+                style={[
+                  styles.greyText,
+                  {color: item.item.garde_label ? 'green' : 'grey'},
+                ]}>
+                {item.item.garde_label
+                  ? item.item.garde_label
+                  : 'Pas de garde (Horaires normaux)'}
+              </Text>
+            </View>
             <View
               style={{
+                flex: 0.2,
                 flexDirection: 'row',
                 justifyContent: 'space-between',
-                marginTop: 15,
+                alignItems: 'center',
               }}>
               <TouchableOpacity
                 onPress={() => {
-                  if (Platform.OS === 'android') {
-                    Linking.openURL(
-                      `geo:0,0?q=${parseFloat(item.item.Lat)},${parseFloat(
-                        item.item.Lng,
-                      )}`,
-                    );
+                  if (item.item.lat && item.item.long) {
+                    if (Platform.OS === 'android') {
+                      Linking.openURL(
+                        `geo:0,0?q=${parseFloat(item.item.lat)},${parseFloat(
+                          item.item.long,
+                        )}`,
+                      );
+                    } else {
+                      Linking.openURL(
+                        `maps:0,0?q=${parseFloat(item.item.lat)},${parseFloat(
+                          item.item.long,
+                        )}`,
+                      );
+                    }
                   } else {
-                    Linking.openURL(
-                      `maps:0,0?q=${parseFloat(item.item.Lat)},${parseFloat(
-                        item.item.Lng,
-                      )}`,
-                    );
+                    alert('Location not available');
                   }
                 }}>
-                <View style={styles.button}>
-                  <Ionicons name="ios-navigate-circle-sharp" size={20} />
-                  <Text style={{margin: 2, fontWeight: '700'}}>Itinéraire</Text>
+                <View style={[styles.button, {backgroundColor: '#44d79e'}]}>
+                  <Octicons name="pin" color="red" size={15} />
+                  <Text style={styles.buttonText}>Itinéraire</Text>
                 </View>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => {
                   Linking.openURL(`tel: ${item.item.Phone}`);
                 }}>
-                <View style={styles.button}>
-                  <Ionicons name="ios-call" size={20} />
-                  <Text style={{margin: 2, fontWeight: '700'}}>Appeler</Text>
+                <View style={[styles.button, {backgroundColor: '#56c3d1'}]}>
+                  <MaterialIcons name="phone" size={15} />
+                  <Text style={styles.buttonText}>Appeler</Text>
                 </View>
               </TouchableOpacity>
             </View>
@@ -196,17 +197,25 @@ const MapScreen = ({navigation}) => {
           goToInitialLocation();
         }}>
         {pharmacies &&
-          pharmacies.map((item, index) => (
-            <Marker
-              key={index}
-              coordinate={{
-                latitude: item.Lat,
-                longitude: item.Lng,
-              }}
-              title={item.Name}>
-              <FontAwesome name={'map-pin'} size={25} color={'red'} />
-            </Marker>
-          ))}
+          pharmacies.map((item, index) => {
+            if (item.lat && item.long) {
+              return (
+                <Marker
+                  key={index}
+                  coordinate={{
+                    latitude: parseFloat(item.lat),
+                    longitude: parseFloat(item.long),
+                  }}
+                  title={item.name}>
+                  <Ionicons
+                    name={'ios-location-sharp'}
+                    size={35}
+                    color={'green'}
+                  />
+                </Marker>
+              );
+            }
+          })}
       </MapView>
       <FlatList
         data={pharmacies}
@@ -231,8 +240,9 @@ const styles = StyleSheet.create({
   greyText: {
     fontSize: 14,
     flexWrap: 'wrap',
-    marginTop: 5,
+    marginVertical: 5,
     color: Theme.grey,
+    width: Dimensions.get('screen').width * 0.55,
   },
   mainText: {
     fontSize: 15,
@@ -242,9 +252,18 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     backgroundColor: Theme.lessGrey,
-    padding: 5,
-    borderRadius: 15,
-    paddingHorizontal: 12,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 5,
+    height: 35,
+    width: 100,
+  },
+  buttonText: {
+    margin: 2,
+    fontWeight: '700',
+    color: '#fff',
+    marginLeft: 5,
   },
 });
 

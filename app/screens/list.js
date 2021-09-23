@@ -11,10 +11,13 @@ import {
   ActivityIndicator,
   Linking,
   Platform,
+  Alert,
 } from 'react-native';
 import Theme from '../theme';
 import Icons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import Octicons from 'react-native-vector-icons/Octicons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import api from '../api/api';
 import Geolocation from 'react-native-geolocation-service';
 import {getDistance, getPreciseDistance} from 'geolib';
@@ -49,24 +52,13 @@ const ListScreen = ({navigation}) => {
     data.append('lat', initialPosition.latitude);
     data.append('lng', initialPosition.longitude);
     try {
-      const results = await api
-        .post('/pharmacies', data, {
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-            authorization: 'Bearer 6c57f52e2c8cabe497d9e0411b7c7dbb',
-          },
-        })
-        .then((res) => {
-          console.log('res: ', res);
+      fetch(
+        `https://app.pharmagarde.ma/api/gards/position/${initialPosition.latitude}/${initialPosition.longitude}`,
+      )
+        .then((response) => response.json())
+        .then((data) => {
           setLoading(false);
-          setPharmacies(res.data.response.pharmacies);
-        })
-        .catch((err) => {
-          setLoading(false);
-          console.log('winners error');
-          Alert.alert(err.message);
-          console.log(err);
+          setPharmacies(JSON.parse(data));
         });
     } catch (err) {
       setLoading(false);
@@ -84,20 +76,22 @@ const ListScreen = ({navigation}) => {
   };
 
   const calculateDistance = (latitude, longitude) => {
-    let dis = getDistance(
-      {
-        latitude: initialPosition.latitude,
-        longitude: initialPosition.longitude,
-      },
-      {latitude: latitude, longitude: longitude},
-    );
+    if (latitude && longitude) {
+      let dis = getDistance(
+        {
+          latitude: initialPosition.latitude,
+          longitude: initialPosition.longitude,
+        },
+        {latitude: latitude, longitude: longitude},
+      );
 
-    if (dis > 1000) {
-      let num = parseFloat(dis / 1000);
-      let cal = num.toFixed(1);
-      return cal + ' km';
-    } else {
-      return dis + ' m';
+      if (dis > 1000) {
+        let num = parseFloat(dis / 1000);
+        let cal = num.toFixed(1);
+        return cal + ' km';
+      } else {
+        return dis + ' m';
+      }
     }
   };
 
@@ -122,50 +116,60 @@ const ListScreen = ({navigation}) => {
             justifyContent: 'space-between',
           }}>
           <View style={{flex: 0.7}}>
-            <Text style={styles.mainText}>{item.item.Name}</Text>
-            <Text style={styles.greyText}>{item.item.City}</Text>
-            <Text style={styles.greyText}>
-              {calculateDistance(item.item.Lat, item.item.Lng)}
-            </Text>
+            <Text style={styles.mainText}>{'Pharmacie ' + item.item.name}</Text>
             <Text
               style={[
                 styles.greyText,
-                {color: item.item.Garde_label ? 'green' : 'grey'},
+                {color: item.item.garde_label ? 'green' : 'grey'},
               ]}>
-              {item.item.Garde_label
-                ? item.item.Garde_label
+              {item.item.garde_label
+                ? item.item.garde_label
                 : 'Pas de garde (Horaires normaux)'}
             </Text>
+            <Text style={styles.greyText}>{item.item.address}</Text>
+            {/* <Text style={styles.greyText}>
+              {calculateDistance(item.item.lat, item.item.long)}
+            </Text> */}
           </View>
           <View
             style={{
               flex: 0.3,
-              flexDirection: 'row',
-              justifyContent: 'space-evenly',
+              justifyContent: 'center',
+              alignItems: 'center',
             }}>
             <TouchableOpacity
               onPress={() => {
-                if (Platform.OS === 'android') {
-                  Linking.openURL(
-                    `geo:0,0?q=${parseFloat(item.item.Lat)},${parseFloat(
-                      item.item.Lng,
-                    )}`,
-                  );
+                if (item.item.lat && item.item.long) {
+                  if (Platform.OS === 'android') {
+                    Linking.openURL(
+                      `geo:0,0?q=${parseFloat(item.item.lat)},${parseFloat(
+                        item.item.long,
+                      )}`,
+                    );
+                  } else {
+                    Linking.openURL(
+                      `maps:0,0?q=${parseFloat(item.item.lat)},${parseFloat(
+                        item.item.long,
+                      )}`,
+                    );
+                  }
                 } else {
-                  Linking.openURL(
-                    `maps:0,0?q=${parseFloat(item.item.Lat)},${parseFloat(
-                      item.item.Lng,
-                    )}`,
-                  );
+                  alert('Location not available');
                 }
               }}>
-              <Ionicons name="ios-navigate-circle-sharp" size={25} />
+              <View style={[styles.button, {backgroundColor: '#56c3d1'}]}>
+                <Octicons name="pin" color="red" size={15} />
+                <Text style={styles.buttonText}>Itinéraire</Text>
+              </View>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                Linking.openURL(`tel: ${item.item.Phone}`);
+                Linking.openURL(`tel: ${item.item.phone}`);
               }}>
-              <Ionicons name="ios-call" size={25} />
+              <View style={[styles.button, {backgroundColor: '#44d79e'}]}>
+                <MaterialIcons name="phone" size={15} />
+                <Text style={styles.buttonText}>Appeler</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -185,7 +189,7 @@ const ListScreen = ({navigation}) => {
     <View style={styles.container}>
       <FlatList
         data={pharmacies}
-        keyExtractor={(item, index) => (item + index).toString()}
+        keyExtractor={(item, index) => item + index}
         // @ts-ignore
         renderItem={renderItem}
         ListEmptyComponent={
@@ -215,10 +219,13 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     marginTop: 5,
     color: Theme.grey,
+    marginRight: 10,
   },
   mainText: {
     fontSize: 15,
     fontWeight: '600',
+    flexWrap: 'wrap',
+    marginRight: 15,
   },
   leftButtton: {
     borderWidth: 1 / 2,
@@ -226,6 +233,22 @@ const styles = StyleSheet.create({
     padding: 5,
     paddingHorizontal: 10,
     borderRadius: 15,
+  },
+  button: {
+    flexDirection: 'row',
+    backgroundColor: Theme.lessGrey,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 5,
+    height: 35,
+    width: 120,
+  },
+  buttonText: {
+    margin: 2,
+    fontWeight: '700',
+    color: '#fff',
+    marginLeft: 7,
   },
 });
 

@@ -5,9 +5,7 @@ import Theme from '../theme';
 import {WebView} from 'react-native-webview';
 
 const AboutScreen = () => {
-  return (
-    <WebView source={{uri: 'http://pharmagarde.ma/pharmagarde-about.html'}} />
-  );
+  return <WebView source={{uri: 'https://pharmagarde.ma/a-propos/'}} />;
 };
 
 const styles = StyleSheet.create({

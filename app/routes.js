@@ -7,7 +7,7 @@ import LoadingScreen from './screens/loading';
 import MapScreen from './screens/map';
 import ListScreen from './screens/list';
 import AboutScreen from './screens/about';
-import Icons from 'react-native-vector-icons/FontAwesome';
+import Icons from 'react-native-vector-icons/Ionicons';
 import Foundation from 'react-native-vector-icons/Foundation';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Theme from './theme';
@@ -20,9 +20,9 @@ const TabNavigator = () => {
     <Tab.Navigator
       tabBarOptions={{
         activeTintColor: Theme.secondaryColor,
-        inactiveTintColor: 'white',
+        inactiveTintColor: Theme.grey,
         style: {
-          backgroundColor: Theme.mainColor,
+          backgroundColor: Theme.whiteColor,
           height: 70,
           paddingBottom: 10,
         },
@@ -33,7 +33,7 @@ const TabNavigator = () => {
         options={{
           tabBarLabel: 'Pharmacies',
           tabBarIcon: ({color, size}) => (
-            <Icons name="map-pin" color={color} size={size} />
+            <Icons name="list" color={color} size={size} />
           ),
         }}
       />
@@ -85,14 +85,14 @@ export function Routes() {
               <Image
                 source={require('./resources/logo.png')}
                 style={{
-                  width: Theme.width * 0.3,
-                  height: 50,
+                  width: Theme.width * 0.25,
+                  height: 40,
                   resizeMode: 'contain',
                   alignSelf: 'center',
                 }}
               />
             ),
-            headerStyle: {height: 100},
+            headerStyle: {height: 70},
           }}
           component={TabNavigator}
         />
