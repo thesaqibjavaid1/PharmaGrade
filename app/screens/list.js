@@ -58,7 +58,7 @@ const ListScreen = ({navigation}) => {
         .then((response) => response.json())
         .then((data) => {
           setLoading(false);
-          setPharmacies(JSON.parse(data));
+          setPharmacies(Object.values(JSON.parse(data)));
         });
     } catch (err) {
       setLoading(false);

@@ -69,8 +69,8 @@ const MapScreen = ({navigation}) => {
     )
       .then((response) => response.json())
       .then((data) => {
-        console.log('data map api', JSON.parse(data));
-        const d = JSON.parse(data);
+        const d = Object.values(JSON.parse(data));
+        console.log(Object.values(JSON.parse(data)));
         mapRef.current?.animateCamera({
           center: {
             latitude: d[0].lat ? d[0].lat : d[39].lat,
@@ -79,7 +79,7 @@ const MapScreen = ({navigation}) => {
           zoom: 25,
         });
         setLoading(false);
-        setPharmacies(JSON.parse(data));
+        setPharmacies(Object.values(JSON.parse(data)));
       });
   };
   React.useEffect(() => {
@@ -196,26 +196,25 @@ const MapScreen = ({navigation}) => {
         onMapReady={() => {
           goToInitialLocation();
         }}>
-        {pharmacies &&
-          pharmacies.map((item, index) => {
-            if (item.lat && item.long) {
-              return (
-                <Marker
-                  key={index}
-                  coordinate={{
-                    latitude: parseFloat(item.lat),
-                    longitude: parseFloat(item.long),
-                  }}
-                  title={item.name}>
-                  <Ionicons
-                    name={'ios-location-sharp'}
-                    size={35}
-                    color={'green'}
-                  />
-                </Marker>
-              );
-            }
-          })}
+        {pharmacies?.map((item, index) => {
+          if (item.lat && item.long) {
+            return (
+              <Marker
+                key={index}
+                coordinate={{
+                  latitude: parseFloat(item.lat),
+                  longitude: parseFloat(item.long),
+                }}
+                title={item.name}>
+                <Ionicons
+                  name={'ios-location-sharp'}
+                  size={35}
+                  color={'green'}
+                />
+              </Marker>
+            );
+          }
+        })}
       </MapView>
       <FlatList
         data={pharmacies}
